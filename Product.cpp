@@ -16,13 +16,13 @@ Product::Product()
 	placed_date.month = 0;
 	placed_date.day = 0;
 
-	loc_start.number = 0;
-	loc_start.section = 0;
-	loc_start.shelf = 0;
+	loc_start.number = 1;
+	loc_start.section = 1;
+	loc_start.shelf = 1;
 
-	loc_end.number = 0;
-	loc_end.section = 0;
-	loc_end.shelf = 0;
+	loc_end.number = 1;
+	loc_end.section = 1;
+	loc_end.shelf = 1;
 
 }
 

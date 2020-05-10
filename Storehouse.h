@@ -16,6 +16,8 @@ public:
 	bool AvailableLocation(const Location l1, int amount);
 	void SaveData(ofstream& out) const;
 
+	const int getCount() const;
+
 private:
 	vector <Product> products;
 	int productsCount;

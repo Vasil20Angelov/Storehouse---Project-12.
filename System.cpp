@@ -56,6 +56,51 @@ bool System::OpenFile()
 
 void System::AddProduct()
 {
+	string product_name, unit, producer, comment;
+	int amount;
+	Date expiry_date, log_date;
+	Location start_loc, end_loc;
+	Product product;
+	cout << "Enter date:";
+	log_date.Set_Date();
+
+	cout << "Product: ";
+	cin.ignore();
+	getline(cin, product_name);
+	cout << "Unit (kg/l): ";
+	do
+	{
+		cin >> unit;
+		if (unit.compare("kg") == 0 || unit.compare("l") == 0)
+			break;
+		else
+			cout << "Enter kg or l." << endl;
+	} while (true);
+
+	cout << "Amount: ";
+	cin >> amount;
+	cout << "Producer: ";
+	cin.ignore();
+	getline(cin, producer);
+	cout << "Expiry date:" << endl;
+	expiry_date.Set_Date();
+	cout << "Comment: ";
+	cin.ignore();
+	getline(cin, comment);
+
+	if (storehouse.getCount() == 0)
+	{
+		start_loc.section = 1;
+		start_loc.shelf = 1;
+		start_loc.number = 1;
+		product = Product(product_name, unit, producer, comment, amount, expiry_date, log_date, start_loc);
+		storehouse.AddProduct(product);
+	}
+	else
+	{
+
+	}
+
 }
 
 void System::run()

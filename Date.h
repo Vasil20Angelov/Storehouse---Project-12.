@@ -7,4 +7,5 @@ struct Date
 	int day;
 
 	bool DateValidation();
+	void Set_Date();
 };

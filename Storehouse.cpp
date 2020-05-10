@@ -40,3 +40,8 @@ void Storehouse::SaveData(ofstream& out) const
 		products[i].save_info(out);
 	}
 }
+
+const int Storehouse::getCount() const
+{
+	return productsCount;
+}

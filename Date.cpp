@@ -4,3 +4,7 @@ bool Date::DateValidation()
 {
 	return false;
 }
+
+void Date::Set_Date()
+{
+}
