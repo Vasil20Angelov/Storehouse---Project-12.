@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Date.cpp" />
+    <ClCompile Include="Location.cpp" />
     <ClCompile Include="Product.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Storehouse.cpp" />

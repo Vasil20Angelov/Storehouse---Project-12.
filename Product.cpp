@@ -46,7 +46,7 @@ Product::Product(const string& product_name, const string& unit, const string& p
 	this->loc_start.shelf = loc_start.shelf;
 	this->loc_start.number = loc_start.number;
 
-	setEndLoc();
+	this->loc_end.setEndLocation(loc_start, amount);
 }
 
 void Product::load_info(ifstream& in)
@@ -109,38 +109,99 @@ void Product::save_info(ofstream& out) const
 	out.write((const char*)&comment[0], len);
 }
 
-void Product::setEndLoc()
+
+bool Product::checkLocation(Location lstart, Location lend)
 {
-	
-	int section_space = amount / 1000;
-	if (amount >= 1000)
-		amount % 1000;
-
-	int shelf_space = amount / 100;
-	int number_space = amount % 100;
-
-	loc_end.number = loc_start.number + number_space / 10;
-	if (number_space % 10 != 0)
-		loc_end.number++;
-
-	if (loc_end.number > 10)
+	if (lstart.section > loc_start.section && lstart.section < loc_end.section)
 	{
-		shelf_space++;
-		loc_end.number %= 10;
+		return false;
 	}
 
-	loc_end.shelf = loc_start.shelf + shelf_space;
-	if (loc_end.shelf > 10)
+	if (lstart.section == loc_start.section && lstart.shelf > loc_start.shelf && lstart.shelf < loc_end.shelf)
 	{
-		section_space++;
-		loc_end.shelf %= 10;
+		return false;
+	}
+	if (lstart.section == loc_end.section && lstart.shelf == loc_end.shelf && lstart.number >= loc_start.number && lstart.number <= loc_end.number)
+	{
+		return false;
 	}
 
-	loc_end.section = loc_start.section + section_space;
+	bool same_section = false;
+	if (lstart.section == lend.section && lend.section == loc_start.section && lend.section == loc_end.section)
+		same_section = true;
+	bool same_shelf = false;
+	if (lstart.shelf == lend.shelf && lend.shelf == loc_start.shelf && lend.shelf == loc_end.shelf)
+		same_shelf = true;
+
+	// Проверка дали е възможно поставянето на продукт на дадено място
+	if (lend.section > loc_start.section && lend.section < loc_end.section)
+	{
+		return false;
+	}
+	if (same_section && lstart.shelf > loc_start.shelf && lstart.shelf < loc_end.shelf)
+	{
+		return false;
+	}
+	if (same_section && lstart.shelf == loc_start.shelf && lstart.shelf != lend.shelf && lstart.number <= loc_start.number)
+	{
+		return false;
+	}
+	if (same_section && lstart.shelf == loc_start.shelf && loc_start.shelf != loc_end.shelf && lstart.number >= loc_start.number)
+	{
+		return false;
+	}
+	if (same_section && lstart.shelf == loc_start.shelf && loc_start.shelf != loc_end.shelf && lstart.shelf != lend.shelf)
+	{
+		return false;
+	}
+	if (same_section && same_shelf && ((lstart.number <= loc_start.number && lend.number >= loc_start.number) || (lstart.number >= loc_start.number && lstart.number <= loc_end.number)))
+	{
+		return false;
+	}
+	if (same_section && same_shelf && lstart.number <= loc_end.number && lend.number >= loc_end.number)
+	{
+		return false;
+	}
+	if (lstart.section == loc_end.section && lstart.shelf == loc_end.shelf && lstart.number <= loc_end.number)
+	{
+		return false;
+	}
+	if (lstart.section == loc_end.section && loc_start.section == loc_end.section && lstart.shelf >= loc_start.shelf && lstart.shelf < loc_end.shelf)
+	{
+		return false;
+	}
+	if (lend.section == loc_end.section && (lend.shelf < loc_end.shelf || (lend.shelf == loc_end.shelf && lend.number <= loc_end.number)))
+	{
+		if (loc_start.section != loc_end.section)
+		{
+			return false;
+		}
+		if (loc_start.section == loc_end.section && loc_start.shelf < lend.shelf)
+		{
+			return false;
+		}
+		if (loc_start.section == loc_end.section && loc_start.shelf == lend.shelf && lend.number >= loc_start.number)
+		{
+			return false;
+		}
+	}
+	if (lend.section == loc_end.section && lend.shelf >= loc_end.shelf)
+	{
+		if (lend.section == lstart.section && (lstart.shelf < loc_end.shelf || (lstart.shelf == loc_end.shelf && lstart.number <= loc_end.number)))
+		{
+			return false;
+		}
+	}
+
+
+	return true;
 }
 
-bool Product::checkLocation(Location l1, int amount)
+bool Product::checkName_Date(const string& name, const Date expiryD)
 {
+	if (name.compare(product_name) == 0 && expiry.Same_date(expiryD))
+		return true;
+	
 	return false;
 }
 

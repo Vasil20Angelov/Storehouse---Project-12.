@@ -21,14 +21,25 @@ void Storehouse::AddProduct(const Product& obj)
 	productsCount++;
 }
 
-bool Storehouse::AvailableLocation(const Location l1, int amount)
+bool Storehouse::AvailableLocation(const Location l1, const Location l2)
 {
 	for (int i = 0; i < productsCount; i++)
 	{
-		if (!products[i].checkLocation(l1, amount))
+		if (!products[i].checkLocation(l1, l2))
 			return false;
 	}
 	return true;
+}
+
+bool Storehouse::Name_date_Match(const string& name, const Date expiryD, int amount)
+{
+	for (int i = 0; i < productsCount; i++)
+	{
+		if (products[i].checkName_Date(name, expiryD))
+		{
+
+		}
+	}
 }
 
 void Storehouse::SaveData(ofstream& out) const

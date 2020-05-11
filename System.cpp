@@ -56,8 +56,10 @@ bool System::OpenFile()
 
 void System::AddProduct()
 {
+	
 	string product_name, unit, producer, comment;
 	int amount;
+	int count = storehouse.getCount();
 	Date expiry_date, log_date;
 	Location start_loc, end_loc;
 	Product product;
@@ -88,7 +90,7 @@ void System::AddProduct()
 	cin.ignore();
 	getline(cin, comment);
 
-	if (storehouse.getCount() == 0)
+	if (count == 0)
 	{
 		start_loc.section = 1;
 		start_loc.shelf = 1;
@@ -98,7 +100,10 @@ void System::AddProduct()
 	}
 	else
 	{
-
+		for (int i = 0; i < count; i++)
+		{
+			if(product_name.compare())
+		}
 	}
 
 }

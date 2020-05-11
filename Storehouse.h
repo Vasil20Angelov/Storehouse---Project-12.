@@ -13,7 +13,8 @@ public:
 	Storehouse(ifstream& in);
 
 	void AddProduct(const Product& obj);
-	bool AvailableLocation(const Location l1, int amount);
+	bool AvailableLocation(const Location l1, const Location l2);
+	bool Name_date_Match(const string& name, const Date expiryD);
 	void SaveData(ofstream& out) const;
 
 	const int getCount() const;
