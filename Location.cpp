@@ -60,3 +60,8 @@ void Location::setEndLocation(const Location& loc_start, int amount)
 
 	section = loc_start.section + section_space;
 }
+
+void Location::showLocation() const
+{
+	cout << section << "/" << shelf << "/" << number;
+}
