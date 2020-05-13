@@ -102,3 +102,18 @@ void Date::Set_Date()
 
 	} while (!isOk);
 }
+
+void Date::Show_Date() const
+{	
+	if (month > 9 && day > 9)
+		cout << year << "." << month << "." << day;
+	else
+		if (month < 10 && day>9)
+			cout << year << ".0" << month << "." << day;
+		else
+			if (month > 9 && day < 10)
+				cout << year << "." << month << ".0" << day;
+			else
+				cout << year << ".0" << month << ".0" << day;
+}
+

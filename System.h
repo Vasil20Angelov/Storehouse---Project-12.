@@ -15,9 +15,11 @@ public:
 	static System& i();
 
 	void ShowMenu() const;
+	void ShowHelp() const;
 	bool OpenFile();
 	bool Savetofile();
-	bool AddtoLogfile(Date logDate, string product_name, int amount,const char sign);
+	bool AddtoLogfile(Date logDate, string product_name, int amount, const char sign);
+	bool ReadFromLogfile();
 	void AddProduct();
 
 	int run();

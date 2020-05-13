@@ -23,7 +23,21 @@ System& System::i()
 
 void System::ShowMenu() const
 {
+	cout << "\nEnter a command" << endl;
+	cout << "1. Add a product" << endl;
+	cout << "2. Remove a product" << endl;
+	cout << "3. Check log info" << endl;
+	cout << "4. Clear" << endl;
+	cout << "5. Close the opened file" << endl;
+	cout << "6. Save the changes" << endl;
+	cout << "7. Save the changes in a new file" << endl;
+	cout << "8. Help" << endl;
+	cout << "0. Exit" << endl;
+	cout << ">> ";
+}
 
+void System::ShowHelp() const
+{
 }
 
 bool System::OpenFile()
@@ -71,7 +85,7 @@ bool System::Savetofile()
 
 bool System::AddtoLogfile(Date logDate, string product_name, int amount, const char sign)
 {
-	ofstream logfile(Lfile, ios::binary, ios::app);
+	ofstream logfile(Lfile, ios::binary | ios::app);
 	if (!logfile)
 	{
 		cout << "Error! Couldn't open the log file!" << endl;
@@ -83,7 +97,47 @@ bool System::AddtoLogfile(Date logDate, string product_name, int amount, const c
 	logfile.write((const char*)&product_name[0], len);
 	logfile.write((const char*)&amount, sizeof(int));
 	logfile.write(&sign, 1);
+	logfile.close();
+	return true;
+}
 
+bool System::ReadFromLogfile()
+{
+	string product_name;
+	Date dFrom, dTo, logDate;
+	int amount;
+	char sign;
+	cout << "Enter date from" << endl;
+	dFrom.Set_Date();
+	cout << "Enter date to" << endl;
+	dTo.Set_Date();
+
+	ifstream logfileR(Lfile, ios::binary);
+	if (!logfileR)
+	{
+		cout << "Error! Couldn't open the log file!" << endl;
+		return false;
+	}
+	while (!logfileR.eof())
+	{
+		logfileR.read((char*)&logDate, sizeof(Date));
+		size_t len;
+		logfileR.read((char*)&len, sizeof(size_t));
+		product_name.resize(len);
+		logfileR.read(&product_name[0], len);
+		logfileR.read((char*)&amount, sizeof(int));
+		logfileR.read((char*)&sign, 1);
+		if (logDate.InPeriod(dFrom, dTo))
+		{
+			logDate.Show_Date();
+			cout << " " << product_name << " " << amount << " ";
+			if (sign == '+')
+				cout << "Added" << endl;
+			else
+				cout << "Removed" << endl;
+		}
+	}
+	logfileR.close();
 	return true;
 }
 
@@ -194,6 +248,10 @@ void System::AddProduct()
 		cout << "The product couldn't be added in the storehouse!" << endl;
 	else
 	{
+		if (AddtoLogfile(log_date, product_name, amount, '+'))
+		{
+
+		}
 		cout << "The product has been added in the storehouse at location: ";
 		start_loc.showLocation();
 		cout << " to ";
@@ -205,15 +263,76 @@ void System::AddProduct()
 
 int System::run()
 {
+	int option;
 	if (!OpenFile())
 		return 0;
+	do
+	{
+		ShowMenu();
+		cin >> option;
+		switch (option)
+		{
+		case 1: // add a product
+		{
+			AddProduct();
+			break;
+		}
+		case 2: // remove
+		{
+			break;
+		}
+		case 3: // log info
+		{
+			ReadFromLogfile();
+			break;
+		}
+		case 4: // clear
+		{
+			break;
+		}
+		case 5: // close
+		{
+			break;
+		}
+		case 6: // save
+		{
+			if (!Savetofile())
+				return 0;
+			break;
+		}
+		case 7: // save as
+		{
+			string tempLoc = file_location;
+			break;
+		}
+		case 8: // help
+		{
+			break;
+		}
+		case 0: // exit
+		{
+			cout << "Exiting the program..." << endl;
+			break;
+		}
+		default:
+		{
+			cout << "Invalid option!" << endl;
+			break;
+		}
+		}
+
+	} while (option != 0);
+	
+
 	//storehouse.ProductsList();
-	AddProduct();
+	/*AddProduct();
 	AddProduct();
 	AddProduct();
 	if (!Savetofile())
 		return 0;
 	
 	storehouse.ProductsList();
+	ReadFromLogfile();
+	*/
 	return 0;
 }
