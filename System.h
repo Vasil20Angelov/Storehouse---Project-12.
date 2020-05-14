@@ -14,7 +14,7 @@ public:
 	static string Lfile;
 	static System& i();
 
-	void ShowMenu() const;
+	void ShowMenu(bool file_opened) const;
 	void ShowHelp() const;
 	bool OpenFile();
 	bool Savetofile();

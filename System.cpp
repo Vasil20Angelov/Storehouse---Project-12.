@@ -21,19 +21,30 @@ System& System::i()
 	return sys;
 }
 
-void System::ShowMenu() const
+void System::ShowMenu(bool file_opened) const
 {
-	cout << "\nEnter a command" << endl;
-	cout << "1. Add a product" << endl;
-	cout << "2. Remove a product" << endl;
-	cout << "3. Check log info" << endl;
-	cout << "4. Clear" << endl;
-	cout << "5. Close the opened file" << endl;
-	cout << "6. Save the changes" << endl;
-	cout << "7. Save the changes in a new file" << endl;
-	cout << "8. Help" << endl;
-	cout << "0. Exit" << endl;
-	cout << ">> ";
+	if (file_opened)
+	{
+		cout << "\nEnter a command" << endl;
+		cout << "1. Add a product" << endl;
+		cout << "2. Remove a product" << endl;
+		cout << "3. Check log info" << endl;
+		cout << "4. Clear" << endl;
+		cout << "5. Close the opened file" << endl;
+		cout << "6. Save the changes" << endl;
+		cout << "7. Save the changes in a new file" << endl;
+		cout << "8. Help" << endl;
+		cout << "0. Exit" << endl;
+		cout << ">> ";
+	}
+	else
+	{
+		cout << "Enter a command" << endl;
+		cout << "1. Open a file" << endl;
+		cout << "2. Help" << endl;
+		cout << "0. Exit" << endl;
+		cout << ">> ";
+	}
 }
 
 void System::ShowHelp() const
@@ -127,6 +138,8 @@ bool System::ReadFromLogfile()
 		logfileR.read(&product_name[0], len);
 		logfileR.read((char*)&amount, sizeof(int));
 		logfileR.read((char*)&sign, 1);
+		if (sign == '.')
+			break;
 		if (logDate.InPeriod(dFrom, dTo))
 		{
 			logDate.Show_Date();
@@ -136,6 +149,7 @@ bool System::ReadFromLogfile()
 			else
 				cout << "Removed" << endl;
 		}
+		sign = '.';
 	}
 	logfileR.close();
 	return true;
@@ -263,63 +277,95 @@ void System::AddProduct()
 
 int System::run()
 {
+	bool file_opened = false;
 	int option;
-	if (!OpenFile())
-		return 0;
 	do
 	{
-		ShowMenu();
-		cin >> option;
-		switch (option)
+		if (!file_opened)
 		{
-		case 1: // add a product
+			ShowMenu(file_opened);
+			cin >> option;
+			switch (option)
+			{
+			case 1:
+			{	
+				if (!OpenFile())
+					return -1;
+
+				break;
+			}
+			case 2:
+			{
+				break;
+			}
+			case 0:
+			{
+				cout << "Exiting the program..." << endl;
+				break;
+			}
+			default:
+			{
+				cout << "Invalid command!" << endl;
+				break;
+			}
+			}
+		}
+		else
 		{
-			AddProduct();
-			break;
+			ShowMenu(file_opened);
+			cin >> option;
+			switch (option)
+			{
+			case 1: // add a product
+			{
+				AddProduct();
+				break;
+			}
+			case 2: // remove
+			{
+				break;
+			}
+			case 3: // log info
+			{
+				ReadFromLogfile();
+				break;
+			}
+			case 4: // clear
+			{
+				break;
+			}
+			case 5: // close
+			{
+				break;
+			}
+			case 6: // save
+			{
+				if (!Savetofile())
+					return 0;
+				break;
+			}
+			case 7: // save as
+			{
+				string tempLoc = file_location;
+				break;
+			}
+			case 8: // help
+			{
+				break;
+			}
+			case 0: // exit
+			{
+				cout << "Exiting the program..." << endl;
+				break;
+			}
+			default:
+			{
+				cout << "Invalid option!" << endl;
+				break;
+			}
+			}
 		}
-		case 2: // remove
-		{
-			break;
-		}
-		case 3: // log info
-		{
-			ReadFromLogfile();
-			break;
-		}
-		case 4: // clear
-		{
-			break;
-		}
-		case 5: // close
-		{
-			break;
-		}
-		case 6: // save
-		{
-			if (!Savetofile())
-				return 0;
-			break;
-		}
-		case 7: // save as
-		{
-			string tempLoc = file_location;
-			break;
-		}
-		case 8: // help
-		{
-			break;
-		}
-		case 0: // exit
-		{
-			cout << "Exiting the program..." << endl;
-			break;
-		}
-		default:
-		{
-			cout << "Invalid option!" << endl;
-			break;
-		}
-		}
+
 
 	} while (option != 0);
 	

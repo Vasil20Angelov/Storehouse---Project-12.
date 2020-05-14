@@ -112,6 +112,7 @@ void Product::save_info(ofstream& out) const
 
 bool Product::checkLocation(Location lstart, Location lend)
 {
+	/*
 	if (lstart.section > loc_start.section && lstart.section < loc_end.section)
 	{
 		return false;
@@ -193,8 +194,18 @@ bool Product::checkLocation(Location lstart, Location lend)
 		}
 	}
 
-
 	return true;
+	*/
+
+	int newStartspace = lstart.section * 10000 + lstart.shelf * 100 + lstart.number;
+	int newEndspace = lend.section * 10000 + lend.shelf * 100 + lend.number;
+	int Startspace = loc_start.section * 10000 + loc_start.shelf * 100 + loc_start.number;
+	int Endspace = loc_end.section * 10000 + loc_end.shelf * 100 + loc_end.number;
+
+	if (newEndspace<Startspace || newStartspace>Endspace)
+		return true;
+
+	return false;
 }
 
 bool Product::checkName_Date(const string& name, const Date expiryD)
