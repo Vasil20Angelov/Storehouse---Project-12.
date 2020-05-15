@@ -1,4 +1,7 @@
+#include <iostream>
+#include <string>
 #include "Product.h"
+using namespace std;
 
 Product::Product()
 {
@@ -109,94 +112,19 @@ void Product::save_info(ofstream& out) const
 	out.write((const char*)&comment[0], len);
 }
 
+void Product::newAmount(int amount)
+{
+	this->amount = amount;
+}
+
+void Product::newELocation(int amount)
+{
+	loc_end.setEndLocation(loc_start, amount);
+}
+
 
 bool Product::checkLocation(Location lstart, Location lend)
 {
-	/*
-	if (lstart.section > loc_start.section && lstart.section < loc_end.section)
-	{
-		return false;
-	}
-
-	if (lstart.section == loc_start.section && lstart.shelf > loc_start.shelf && lstart.shelf < loc_end.shelf)
-	{
-		return false;
-	}
-	if (lstart.section == loc_end.section && lstart.shelf == loc_end.shelf && lstart.number >= loc_start.number && lstart.number <= loc_end.number)
-	{
-		return false;
-	}
-
-	bool same_section = false;
-	if (lstart.section == lend.section && lend.section == loc_start.section && lend.section == loc_end.section)
-		same_section = true;
-	bool same_shelf = false;
-	if (lstart.shelf == lend.shelf && lend.shelf == loc_start.shelf && lend.shelf == loc_end.shelf)
-		same_shelf = true;
-
-	// Проверка дали е възможно поставянето на продукт на дадено място
-	if (lend.section > loc_start.section && lend.section < loc_end.section)
-	{
-		return false;
-	}
-	if (same_section && lstart.shelf > loc_start.shelf && lstart.shelf < loc_end.shelf)
-	{
-		return false;
-	}
-	if (same_section && lstart.shelf == loc_start.shelf && lstart.shelf != lend.shelf && lstart.number <= loc_start.number)
-	{
-		return false;
-	}
-	if (same_section && lstart.shelf == loc_start.shelf && loc_start.shelf != loc_end.shelf && lstart.number >= loc_start.number)
-	{
-		return false;
-	}
-	if (same_section && lstart.shelf == loc_start.shelf && loc_start.shelf != loc_end.shelf && lstart.shelf != lend.shelf)
-	{
-		return false;
-	}
-	if (same_section && same_shelf && ((lstart.number <= loc_start.number && lend.number >= loc_start.number) || (lstart.number >= loc_start.number && lstart.number <= loc_end.number)))
-	{
-		return false;
-	}
-	if (same_section && same_shelf && lstart.number <= loc_end.number && lend.number >= loc_end.number)
-	{
-		return false;
-	}
-	if (lstart.section == loc_end.section && lstart.shelf == loc_end.shelf && lstart.number <= loc_end.number)
-	{
-		return false;
-	}
-	if (lstart.section == loc_end.section && loc_start.section == loc_end.section && lstart.shelf >= loc_start.shelf && lstart.shelf < loc_end.shelf)
-	{
-		return false;
-	}
-	if (lend.section == loc_end.section && (lend.shelf < loc_end.shelf || (lend.shelf == loc_end.shelf && lend.number <= loc_end.number)))
-	{
-		if (loc_start.section != loc_end.section)
-		{
-			return false;
-		}
-		if (loc_start.section == loc_end.section && loc_start.shelf < lend.shelf)
-		{
-			return false;
-		}
-		if (loc_start.section == loc_end.section && loc_start.shelf == lend.shelf && lend.number >= loc_start.number)
-		{
-			return false;
-		}
-	}
-	if (lend.section == loc_end.section && lend.shelf >= loc_end.shelf)
-	{
-		if (lend.section == lstart.section && (lstart.shelf < loc_end.shelf || (lstart.shelf == loc_end.shelf && lstart.number <= loc_end.number)))
-		{
-			return false;
-		}
-	}
-
-	return true;
-	*/
-
 	int newStartspace = lstart.section * 10000 + lstart.shelf * 100 + lstart.number;
 	int newEndspace = lend.section * 10000 + lend.shelf * 100 + lend.number;
 	int Startspace = loc_start.section * 10000 + loc_start.shelf * 100 + loc_start.number;
@@ -216,6 +144,22 @@ bool Product::checkName_Date(const string& name, const Date expiryD)
 	return false;
 }
 
+bool Product::expired_date(const Date e1)
+{
+	if (expiry.ExpiredDate(e1))
+		return true;
+
+	return false;
+}
+
+bool Product::compareEdate(const Date d2)
+{
+	if (expiry.DateCompare(d2))
+		return true;
+
+	return false;
+}
+
 const string Product::get_productname() const
 {
 	return product_name;
@@ -224,6 +168,16 @@ const string Product::get_productname() const
 const string Product::get_unit() const
 {
 	return unit;
+}
+
+const string Product::get_producer() const
+{
+	return producer;
+}
+
+const string Product::get_comment() const
+{
+	return comment;
 }
 
 const int Product::get_amount() const

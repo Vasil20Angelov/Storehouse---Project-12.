@@ -15,10 +15,12 @@ public:
 	static System& i();
 
 	void ShowMenu(bool file_opened) const;
-	void ShowHelp() const;
+	void ShowHelp(bool file_opened) const;
 	bool OpenFile();
 	bool Savetofile();
 	bool AddtoLogfile(Date logDate, string product_name, int amount, const char sign);
+	bool RemoveProduct();
+	bool Clear();
 	bool ReadFromLogfile();
 	void AddProduct();
 

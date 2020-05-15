@@ -28,12 +28,13 @@ void System::ShowMenu(bool file_opened) const
 		cout << "\nEnter a command" << endl;
 		cout << "1. Add a product" << endl;
 		cout << "2. Remove a product" << endl;
-		cout << "3. Check log info" << endl;
-		cout << "4. Clear" << endl;
-		cout << "5. Close the opened file" << endl;
-		cout << "6. Save the changes" << endl;
-		cout << "7. Save the changes in a new file" << endl;
-		cout << "8. Help" << endl;
+		cout << "3. Show all products in the storehouse" << endl;
+		cout << "4. Check log info" << endl;
+		cout << "5. Clear the storehouse" << endl;
+		cout << "6. Save" << endl;
+		cout << "7. Save as" << endl;
+		cout << "8. Close the opened file" << endl;
+		cout << "9. Help" << endl;
 		cout << "0. Exit" << endl;
 		cout << ">> ";
 	}
@@ -47,13 +48,42 @@ void System::ShowMenu(bool file_opened) const
 	}
 }
 
-void System::ShowHelp() const
+void System::ShowHelp(bool file_opened) const
 {
+	cout << "\nHelp menu" << endl;
+	if (!file_opened)
+	{
+		cout << "1. Opens a file by entered file name and loads the information from the file." << endl;
+		cout << "2. Shows help information" << endl;
+		cout << "0. Exists the program" << endl;
+		cout << "\nNote: \n-> After you open a file, the other options will be unlocked" << endl;
+	}
+	else
+	{
+		cout << "1. Adds a product to the storehouse" << endl;
+		cout << "2. Removes a certain amount from selected product" << endl;
+		cout << "3. Shows information about the products in the storehouse" << endl;
+		cout << "4. Shows all products that have been ever added or removed in the selected time piriod" << endl;
+		cout << "5. Removes all expired products and all products which will expire in the next 5 days. Also calculates loses" << endl;
+		cout << "6. Saves all changes";
+		cout << "7. Saves all changes in another file" << endl;
+		cout << "8. Closes the opened file" << endl;
+		cout << "9. Shows help information" << endl;
+		cout << "0. Exists the program" << endl;
+		cout << "\nNotes:" << endl;
+		cout << "-> After a file is closed, you have to open another to continue your work in the storehouse" << endl;
+		cout << "-> The storehouse contains 100 sections, 10 shelfs in 1 section and each shelf has 10 columns(numbers)" << endl;
+		cout << "-> In 1 column(number) can be contained 10kg/l of any product" << endl;
+	}
+
+	cout << "\nEnter any symbol to go back to the main menu... ";
+	string s;
+	cin >> s;
 }
 
 bool System::OpenFile()
 {
-	cout << "Enter file name..." << endl;
+	cout << "Enter file name (without the extension)\n>> ";
 	cin >> file_location;
 	file_location + ".bin";
 	ofstream file(file_location, ios::binary | ios::app);
@@ -109,6 +139,187 @@ bool System::AddtoLogfile(Date logDate, string product_name, int amount, const c
 	logfile.write((const char*)&amount, sizeof(int));
 	logfile.write(&sign, 1);
 	logfile.close();
+	return true;
+}
+
+bool System::RemoveProduct()
+{
+	if (storehouse.getCount() == 0)
+	{
+		cout << "The storehouse is empty" << endl;
+		return true;
+	}
+
+	Date d;
+	string name;
+	int amount, total_amount = 0, index;
+	cout << "\nEnter date" << endl;
+	d.Set_Date();
+	cout << "\nEnter a product: ";
+	cin.ignore();
+	getline(cin, name);
+	cout << "\nEnter the amount you want to remove: ";
+	cin >> amount;
+	if (amount <= 0)
+	{
+		cout << "Nothing has been removed" << endl;
+		return true;
+	}
+
+	int count = storehouse.getCount();
+	for (int i = 0; i < count; i++)
+	{
+		if (name.compare(storehouse.getName(i)) == 0)
+			total_amount += storehouse.getAmount(i);
+	}
+
+	if (total_amount == 0)
+	{
+		cout << name << " hasn't been found in the storehouse" << endl;
+		return true;
+	}
+	if (total_amount < amount) // removes all products
+	{
+		cout << "You have only " << total_amount << " kg/l of this product. Do you want to remove all?" << endl;
+
+		bool remove = false;
+		do
+		{
+			char s;
+			cout << "[Y]es/[N]o\n>> ";
+			cin >> s;
+			if (s == 'y' || s == 'Y')
+			{
+				remove = true;
+				break;
+			}
+			if (s == 'n' || s == 'N')
+				break;
+
+		} while (true);
+
+		if (remove)
+		{
+			for (int i = 0; i < count; i++)
+			{
+				if (name.compare(storehouse.getName(i)) == 0)
+				{
+					if (!AddtoLogfile(d, name, storehouse.getAmount(i), '-'))
+						return false;
+
+					cout << name << ", " << storehouse.getAmount(i) << storehouse.getUnit(i) << " with expiry date: ";
+					storehouse.getEdate(i).Show_Date();
+					cout << "\nLocated from ";
+					storehouse.getSLoc(i).showLocation();
+					cout << " to ";
+					storehouse.getELoc(i).showLocation();
+					cout << "  has been removed from the storehouse" << endl;
+
+					storehouse.RemoveProduct(i);
+				}
+			}
+			return true;
+		}
+		else
+		{
+			cout << "Nothing has been removed from the storehouse" << endl;
+			return true;
+		}
+
+	}
+
+	while (amount > 0)
+	{
+		index = storehouse.RemoveProducts(name);
+		if (amount - storehouse.getAmount(index) >= 0)
+		{
+			if (!AddtoLogfile(d, name, storehouse.getAmount(index), '-'))
+				return false;
+
+			cout << storehouse.getAmount(index) << storehouse.getUnit(index) << " have been removed from " << name << " with expiry date: ";
+			storehouse.getEdate(index).Show_Date();
+			cout << "\nLocated from ";
+			storehouse.getSLoc(index).showLocation();
+			cout << " to ";
+			storehouse.getELoc(index).showLocation();
+			cout << "  has been removed from the storehouse" << endl << endl;
+
+			amount -= storehouse.getAmount(index);
+			storehouse.RemoveProduct(index);
+		}
+		else
+		{
+			if (!AddtoLogfile(d, name, amount, '-'))
+				return false;
+
+			cout << amount << " kg/l have been removed from " << name << " with expiry date: ";
+			storehouse.getEdate(index).Show_Date();
+			cout << "\nLocated from ";
+			storehouse.getSLoc(index).showLocation();
+			cout << " to ";
+			storehouse.getELoc(index).showLocation();
+			cout << endl;
+
+			storehouse.SetNewAmount(index, storehouse.getAmount(index) - amount);
+			storehouse.SetNewELocation(index, amount);
+			
+			break;
+		}
+
+	}
+
+	return true;
+}
+
+bool System::Clear()
+{	
+	if (storehouse.getCount() == 0)
+	{
+		cout << "The storehouse is empty." << endl;
+		return true;
+	}
+
+	Date Edate;
+	int index, total_amount = 0;
+	double price;
+	bool newproduct = true;
+	string name = "";
+	cout << "\nEnter a date to remove all expired products and all products that will expire in the next 5 days" << endl;
+	Edate.Set_Date();
+	while (storehouse.CurIndex != storehouse.getCount())
+	{
+		index = storehouse.ClearStorehouse(Edate);
+		if (index == -1)
+			break;
+		if (!AddtoLogfile(Edate, storehouse.getName(index), storehouse.getAmount(index), '-'))
+			return false;
+
+		if (name.compare(storehouse.getName(index)) != 0)
+		{
+			if (!newproduct)
+				cout << "Loses: " << price * total_amount << endl;
+			
+			name = storehouse.getName(index);
+			cout << "\nEnter price for 1 kg/l " << name << endl << ">> ";
+			cin >> price;
+			total_amount = storehouse.getAmount(index);
+		}
+		else
+			total_amount += storehouse.getAmount(index);
+
+		cout << storehouse.getName(index) << ", " << storehouse.getAmount(index) << storehouse.getUnit(index) << ", Expiry date: ";
+		storehouse.getEdate(index).Show_Date();
+		cout << endl;
+		storehouse.RemoveProduct(index);
+		newproduct = false;
+	}
+
+	if (newproduct)
+		cout << "No products have been removed" << endl;
+	else
+		cout << "Loses: " << price * total_amount <<" leva" << endl;
+	storehouse.resetCurIndex();
+
 	return true;
 }
 
@@ -198,8 +409,13 @@ void System::AddProduct()
 		start_loc.number = 0;
 		product = Product(product_name, unit, producer, comment, amount, expiry_date, log_date, start_loc);
 		end_loc = product.get_Elocation();
-		storehouse.AddProduct(product);
-		placed = true;
+		if (end_loc.section >= 100)
+			cout << "Not enough space in the storehouse" << endl;
+		else
+		{
+			storehouse.AddProduct(product);
+			placed = true;
+		}
 	}
 	else
 	{
@@ -211,15 +427,18 @@ void System::AddProduct()
 			{
 				start_loc.setStartLocation(storehouse.getELoc(CurIndex));
 				end_loc.setEndLocation(start_loc, amount);
-				if (storehouse.AvailableLocation(start_loc, end_loc))
+				if (end_loc.section < 100)
 				{
-					product = Product(product_name, unit, producer, comment, amount, expiry_date, log_date, start_loc);
-					storehouse.AddProduct(product);
-					placed = true;
-					storehouse.resetCurIndex();
-					break;
+					if (storehouse.AvailableLocation(start_loc, end_loc))
+					{
+						product = Product(product_name, unit, producer, comment, amount, expiry_date, log_date, start_loc);
+						storehouse.AddProduct(product);
+						placed = true;
+						storehouse.resetCurIndex();
+						break;
+					}
+					curIndex2 = CurIndex;
 				}
-				curIndex2 = CurIndex;
 			}
 			else
 				break;
@@ -231,12 +450,15 @@ void System::AddProduct()
 			{
 				start_loc.setRandomLocation();
 				end_loc.setEndLocation(start_loc, amount);
-				if (storehouse.AvailableLocation(start_loc, end_loc))
+				if (end_loc.section < 100)
 				{
-					product = Product(product_name, unit, producer, comment, amount, expiry_date, log_date, start_loc);
-					storehouse.AddProduct(product);
-					placed = true;
-					break;
+					if (storehouse.AvailableLocation(start_loc, end_loc))
+					{
+						product = Product(product_name, unit, producer, comment, amount, expiry_date, log_date, start_loc);
+						storehouse.AddProduct(product);
+						placed = true;
+						break;
+					}
 				}
 			}
 		}
@@ -247,12 +469,15 @@ void System::AddProduct()
 			{
 				start_loc.setStartLocation(storehouse.getELoc(i));
 				end_loc.setEndLocation(start_loc, amount);
-				if (storehouse.AvailableLocation(start_loc, end_loc))
+				if (end_loc.section < 100)
 				{
-					product = Product(product_name, unit, producer, comment, amount, expiry_date, log_date, start_loc);
-					storehouse.AddProduct(product);
-					placed = true;
-					break;
+					if (storehouse.AvailableLocation(start_loc, end_loc))
+					{
+						product = Product(product_name, unit, producer, comment, amount, expiry_date, log_date, start_loc);
+						storehouse.AddProduct(product);
+						placed = true;
+						break;
+					}
 				}
 			}
 		}
@@ -263,16 +488,14 @@ void System::AddProduct()
 	else
 	{
 		if (AddtoLogfile(log_date, product_name, amount, '+'))
-		{
-
-		}
+		{ 
 		cout << "The product has been added in the storehouse at location: ";
 		start_loc.showLocation();
 		cout << " to ";
 		end_loc.showLocation();
 		cout << endl;
+		}
 	}
-
 }
 
 int System::run()
@@ -291,11 +514,12 @@ int System::run()
 			{	
 				if (!OpenFile())
 					return -1;
-
+				file_opened = true;
 				break;
 			}
 			case 2:
 			{
+				ShowHelp(file_opened);
 				break;
 			}
 			case 0:
@@ -323,34 +547,54 @@ int System::run()
 			}
 			case 2: // remove
 			{
+				if (!RemoveProduct())
+					return -1;
 				break;
 			}
-			case 3: // log info
+			case 3: // show all products
+			{
+				storehouse.ProductsList();
+				break;
+			}
+			case 4: // log info
 			{
 				ReadFromLogfile();
 				break;
 			}
-			case 4: // clear
+			case 5: // clear
 			{
-				break;
-			}
-			case 5: // close
-			{
+				if (!Clear())
+					return -1;
 				break;
 			}
 			case 6: // save
 			{
 				if (!Savetofile())
-					return 0;
+					return -1;
+				cout << "The information has been saved!" << endl;
 				break;
 			}
 			case 7: // save as
 			{
 				string tempLoc = file_location;
+				cout << "Enter the name of the file where you want to save the information (without the extension)\n>> ";
+				cin >> file_location;
+				file_location + ".bin";
+				if (!Savetofile())
+					return -1;
+				file_location = tempLoc;
+				cout << "The information has been saved!" << endl;
 				break;
 			}
-			case 8: // help
+			case 8: // close
 			{
+				file_opened = false;
+				cout << "The opened file has been closed." << endl << endl;
+				break;
+			}
+			case 9: // help
+			{
+				ShowHelp(file_opened);
 				break;
 			}
 			case 0: // exit
@@ -366,19 +610,7 @@ int System::run()
 			}
 		}
 
-
 	} while (option != 0);
-	
 
-	//storehouse.ProductsList();
-	/*AddProduct();
-	AddProduct();
-	AddProduct();
-	if (!Savetofile())
-		return 0;
-	
-	storehouse.ProductsList();
-	ReadFromLogfile();
-	*/
 	return 0;
 }

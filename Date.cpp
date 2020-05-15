@@ -61,6 +61,26 @@ bool Date::InPeriod(Date d1, Date d2)
 	return false;
 }
 
+bool Date::ExpiredDate(Date e1)
+{
+	int ProductEDate = year * 10000 + month * 100 + day;
+	int eDate = e1.year * 10000 + e1.month * 100 + e1.day + 5;
+	if (ProductEDate <= eDate)
+		return true;
+
+	return false;
+}
+
+bool Date::DateCompare(Date d2)
+{
+	int ProductDate = year * 10000 + month * 100 + day;
+	int date2 = d2.year * 10000 + d2.month * 100 + d2.day;
+	if (ProductDate < date2)
+		return true;
+
+	return false;
+}
+
 void Date::Set_Date()
 {
 	bool isOk = true;
